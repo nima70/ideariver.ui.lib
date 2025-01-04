@@ -1,31 +1,46 @@
 import React from "react";
-import { Handle, Position } from "reactflow";
-import Image from "next/image"; // For Next.js image optimization (optional)
+import { Handle, Position, NodeProps } from "reactflow";
+import Image from "next/image";
 
-interface NodeProps {
-  data: {
-    label: string;
-    inputs?: string[];
-    outputs?: string[];
-  };
+interface CustomNodeData {
+  label: string;
+  icon?: string;  // Optional icon or image
+  inputs?: string[];
+  outputs?: string[];
 }
 
-export default function CustomNode({ data }: NodeProps) {
-  const { label, inputs = [], outputs = [] } = data;
+// Use NodeProps to properly handle selection from ReactFlow
+export default function CustomNode({ data, selected }: NodeProps<CustomNodeData>) {
+  const { label, inputs = [], outputs = [], icon } = data;
 
   const handleOffset = 40;
   const nodeHeight = Math.max(
-    120,
+    140,
     Math.max(inputs.length, outputs.length) * handleOffset + 40
   );
 
   return (
     <div
-      className="p-6 bg-card text-primary-foreground rounded-lg shadow-lg relative flex flex-col items-center"
-      style={{ height: `${nodeHeight}px` }}
+      className={`p-6 rounded-lg shadow-lg relative flex flex-col items-center ${
+        selected ? "border-4 border-primary" : "bg-card"
+      }`}
+      style={{ height: `${nodeHeight}px`, width: "220px" }}
     >
       {/* Node Label */}
       <div className="text-lg font-extrabold text-foreground mb-2">{label}</div>
+
+      {/* Center Image/Icon */}
+      {icon && (
+        <div className="w-16 h-16 relative mb-4">
+          <Image
+            src={icon}
+            alt={label}
+            layout="fill"
+            objectFit="contain"
+            className="rounded-md"
+          />
+        </div>
+      )}
 
       {/* Dynamic Input Handles */}
       {inputs.map((input, index) => (

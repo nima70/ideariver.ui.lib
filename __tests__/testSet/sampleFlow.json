@@ -1,0 +1,68 @@
+{
+  "nodes": [
+    {
+      "id": "0.19407061602281406",
+      "type": "custom",
+      "position": {
+        "x": -169.67751873696898,
+        "y": 103.35404727379563
+      },
+      "data": {
+        "label": "Constant Value Generator",
+        "inputs": ["dt"],
+        "outputs": ["signal"],
+        "parameters": {
+          "value": 5
+        }
+      },
+      "selectable": true,
+      "draggable": true,
+      "width": 220,
+      "height": 140,
+      "selected": false,
+      "positionAbsolute": {
+        "x": -169.67751873696898,
+        "y": 103.35404727379563
+      },
+      "dragging": false
+    },
+    {
+      "id": "0.9282406088660826",
+      "type": "custom",
+      "position": {
+        "x": 288.4386650682936,
+        "y": 39.248765779363055
+      },
+      "data": {
+        "label": "RL Circuit",
+        "inputs": ["voltage"],
+        "outputs": ["current"],
+        "parameters": {
+          "R": 10,
+          "L": 5,
+          "initialCurrent": 0,
+          "dt": 0.01
+        }
+      },
+      "selectable": true,
+      "draggable": true,
+      "width": 220,
+      "height": 140,
+      "selected": true,
+      "positionAbsolute": {
+        "x": 288.4386650682936,
+        "y": 39.248765779363055
+      },
+      "dragging": false
+    }
+  ],
+  "edges": [
+    {
+      "source": "0.19407061602281406",
+      "sourceHandle": "output-0",
+      "target": "0.9282406088660826",
+      "targetHandle": "input-0",
+      "id": "reactflow__edge-0.19407061602281406output-0-0.9282406088660826input-0"
+    }
+  ]
+}

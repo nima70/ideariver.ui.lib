@@ -1,14 +1,20 @@
 import { Node, Edge } from "reactflow";
 import { configPlugins } from "../../controlengines/plugins/configPlugins";
-import { PluginConfig } from "../../controlengines/core/PluginConfig";
 import { BasePlugin } from "../../controlengines/core/BasePlugin";
+import { PluginConfig } from "../../controlengines/core/PluginConfig";
 
-// Helper function to get plugin instance by name
-const getPluginInstance = (pluginName: string) => {
-  const foundPlugin = configPlugins.find(
-    (p) => p.config.name === pluginName
-  );
-  return foundPlugin ? new foundPlugin.plugin() : null;
+// Helper to construct and initialize plugin instances
+const getPluginInstance = (pluginName: string, parameters: any) => {
+  const foundPlugin = configPlugins.find((p) => p.config.name === pluginName);
+
+  if (!foundPlugin) {
+    console.warn(`Plugin ${pluginName} not found.`);
+    return null;
+  }
+
+  const pluginInstance = new foundPlugin.plugin();
+  pluginInstance.init(parameters || {});
+  return pluginInstance;
 };
 
 // Execute Flow Function
@@ -20,7 +26,7 @@ export async function executeFlow(
   const nodeMap = new Map(nodes.map((node) => [node.id, node]));
   const results: Record<string, any> = {};
   const nodeOutputs: Record<string, any> = {};
-  
+
   // Find starting nodes (nodes without incoming edges)
   const startingNodes = nodes.filter(
     (node) => !edges.some((edge) => edge.target === node.id)
@@ -33,18 +39,14 @@ export async function executeFlow(
 
   // Recursive execution function
   async function executeNode(node: Node, input: Record<string, any>) {
-    const pluginInstance = getPluginInstance(node.data.label);
+    const pluginInstance = getPluginInstance(
+      node.data.label,
+      node.data.parameters
+    );
 
     if (!pluginInstance) {
-      console.warn(`Plugin ${node.data.label} not found`);
+      console.warn(`Plugin ${node.data.label} could not be instantiated.`);
       return;
-    }
-
-    // Initialize the plugin if needed
-    if (!results[node.id]) {
-      pluginInstance.init({
-        ...(node.data.parameters || {}),
-      });
     }
 
     // Execute plugin with the input
@@ -52,8 +54,9 @@ export async function executeFlow(
 
     // Store output
     nodeOutputs[node.id] = output;
+    results[node.id] = output;
 
-    // Find all connected edges to propagate results
+    // Find connected nodes and propagate outputs
     const connectedEdges = edges.filter((edge) => edge.source === node.id);
 
     for (const edge of connectedEdges) {
@@ -62,13 +65,17 @@ export async function executeFlow(
       if (targetNode) {
         const targetInput = { ...initialInput };
 
-        // Map outputs to inputs (match by key/index if possible)
-        nodeOutputs[node.id]?.forEach((value: any, index: number) => {
-          const inputKey = targetNode.data.inputs?.[index] || "default";
-          targetInput[inputKey] = value;
-        });
+        // Map outputs to inputs (match by key or order)
+        // Updated mapping logic in executeNode function
+        for (const [key, value] of Object.entries(nodeOutputs[node.id] || {})) {
+          const inputKey = targetNode.data.inputs?.find(
+            (input: string) => input === key
+          ) || key; // Match by key or fallback to default
 
-        // Recursively execute next node
+          targetInput[inputKey] = value;
+        }
+
+        // Recursively execute the next node
         await executeNode(targetNode, targetInput);
       }
     }

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import ReactFlow, {
   Background,
   Controls,
@@ -11,35 +11,35 @@ import ReactFlow, {
 } from "reactflow";
 import "reactflow/dist/style.css";
 import CustomNode from "./CustomNode";
-
-const plugins = [
-  {
-    id: "1",
-    label: "DC Motor",
-    icon: "/images/industrial-motor.jpg",
-    inputs: ["voltage"],
-    outputs: ["current", "torque", "position", "speed"],
-  },
-];
-
-const initialNodes: Node[] = plugins.map((plugin, index) => ({
-  id: plugin.id,
-  type: "custom",
-  position: { x: 200 * index, y: 100 },
-  data: { ...plugin },
-}));
-
+import FlowToolbar from "./FlowToolbar";
+import SaveButton from "./SaveButton";
+import NodeParameterDrawer from "./NodeParameterDrawer";
 const initialEdges: Edge[] = [];
 
 export default function PluginFlow() {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node[]>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  const [isDrawerOpen, setDrawerOpen] = useState(false);
+  // Add node callback
+  const addNode = (node: Node) => {
+    setNodes((nds) =>
+      nds.concat({
+        ...node,
+        selectable: true, // Ensure node can be selected
+        draggable: true,
+      })
+    );
+  };
 
-  const onConnect = useCallback(
-    (params: Edge | Connection) => setEdges((eds) => addEdge(params, eds)),
-    []
-  );
+  // Update node callback
+  const updateNode = (id: string, data: Partial<Node>) => {
+    setNodes((nds) =>
+      nds.map((node) => (node.id === id ? { ...node, ...data } : node))
+    );
+  };
 
+  // Delete nodes/edges on Delete key
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if (event.key === "Delete" || event.key === "Backspace") {
@@ -50,34 +50,38 @@ export default function PluginFlow() {
     [setNodes, setEdges]
   );
 
-  const addNode = () => {
-    const newNode: Node = {
-      id: `${nodes.length + 1}`,
-      type: "custom",
-      position: { x: Math.random() * 400, y: Math.random() * 400 },
-      data: {
-        label: `New Node ${nodes.length + 1}`,
-        inputs: ["input"],
-        outputs: ["output"],
-      },
-    };
-    setNodes((nds) => nds.concat(newNode));
-  };
-
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
+  // Select node for toolbar update
+  const onNodeClick = (_: any, node: Node) => {
+    setSelectedNode(node);
+  };
+  const onNodeDoubleClick = (_: any, node: Node) => {
+    console.log("Double-click detected on:", node);
+    setSelectedNode(node);
+    setDrawerOpen(true);
+  };
+
+  // Handle edge connection
+  const onConnect = useCallback(
+    (params: Edge | Connection) => setEdges((eds) => addEdge(params, eds)),
+    []
+  );
+
   return (
     <div className="relative w-full h-screen">
-      {/* Add Node Button with z-index fix */}
-      <button
-        onClick={addNode}
-        className="absolute top-4 left-4 z-50 bg-primary text-primary-foreground px-4 py-2 rounded shadow-lg"
-      >
-        Add Node
-      </button>
+      {/* Toolbar with Drawer for Adding Nodes */}
+      <div className="absolute top-4 left-4 z-50 flex flex-col gap-4">
+        <FlowToolbar
+          onAddNode={addNode}
+          onUpdateNode={updateNode}
+          selectedNode={selectedNode}
+        />
+        <SaveButton nodes={nodes} edges={edges} />
+      </div>
 
       {/* React Flow Canvas */}
       <div className="w-full h-full absolute inset-0 z-10">
@@ -88,15 +92,24 @@ export default function PluginFlow() {
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
+          onNodeClick={onNodeClick}
+          onNodeDoubleClick={onNodeDoubleClick}
           fitView
           nodesDraggable={true}
           nodesConnectable={true}
-          elementsSelectable={true}
+          elementsSelectable={true} // Enable selection and interaction
+          selectNodesOnDrag={true} // Allow selection during drag
         >
           <Background />
           <Controls />
         </ReactFlow>
       </div>
+      <NodeParameterDrawer
+        selectedNode={selectedNode}
+        isOpen={isDrawerOpen}
+        onSave={updateNode}
+        onClose={() => setDrawerOpen(false)}
+      />
     </div>
   );
 }

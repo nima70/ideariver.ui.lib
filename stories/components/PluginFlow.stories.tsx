@@ -3,7 +3,7 @@ import PluginFlow from "../../components/PluginFlow";
 import { Meta } from "@storybook/react";
 
 export default {
-  title: "Plugins/Plugin Flow Diagram",
+  title: "Flow/Plugin Flow Diagram",
   component: PluginFlow,
 } as Meta;
 

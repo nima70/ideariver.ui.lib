@@ -32,6 +32,10 @@ export default function FlowToolbar({ onAddNode }: FlowToolbarProps) {
         label: plugin.name,
         inputs: plugin.inputs?.map((input) => input.name) || [], // Extract input names
         outputs: plugin.outputs?.map((output) => output.name) || [], // Extract output names
+        parameters: plugin.parameters?.reduce((acc, param) => {
+          acc[param.name] = param.default || ""; // Set default values for parameters
+          return acc;
+        }, {} as Record<string, any>), // Map parameters to their default values
       },
     };
     onAddNode(newNode);
@@ -41,7 +45,7 @@ export default function FlowToolbar({ onAddNode }: FlowToolbarProps) {
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
-        <Button className="bg-primary">Add Plugin Node</Button>
+        <Button className="bg-primary">Add Node</Button>
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader>

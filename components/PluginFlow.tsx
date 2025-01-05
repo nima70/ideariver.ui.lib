@@ -14,6 +14,7 @@ import CustomNode from "./CustomNode";
 import FlowToolbar from "./FlowToolbar";
 import SaveButton from "./SaveButton";
 import NodeParameterDrawer from "./NodeParameterDrawer";
+import { Button } from "./ui/button";
 const initialEdges: Edge[] = [];
 
 export default function PluginFlow() {
@@ -21,6 +22,7 @@ export default function PluginFlow() {
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [isDrawerOpen, setDrawerOpen] = useState(false);
+  const [isNodeSelected, setNodeSelected] = useState(false);
   // Add node callback
   const addNode = (node: Node) => {
     setNodes((nds) =>
@@ -71,6 +73,20 @@ export default function PluginFlow() {
     []
   );
 
+  const handleSelectionChange = (params: any) => {
+    if (params.nodes.length > 0) {
+      setNodeSelected(true);
+      setSelectedNode(params.nodes[0]); // Select the first node
+    } else {
+      setNodeSelected(false);
+      setSelectedNode(null); // No node selected
+    }
+  };
+
+  const handleEditNode = () => {
+    setDrawerOpen(true);
+  };
+
   return (
     <div className="relative w-full h-screen">
       {/* Toolbar with Drawer for Adding Nodes */}
@@ -80,6 +96,9 @@ export default function PluginFlow() {
           onUpdateNode={updateNode}
           selectedNode={selectedNode}
         />
+        <Button disabled={!isNodeSelected} onClick={handleEditNode}>
+          Edit Node
+        </Button>
         <SaveButton nodes={nodes} edges={edges} />
       </div>
 
@@ -99,6 +118,7 @@ export default function PluginFlow() {
           nodesConnectable={true}
           elementsSelectable={true} // Enable selection and interaction
           selectNodesOnDrag={true} // Allow selection during drag
+          onSelectionChange={handleSelectionChange}
         >
           <Background />
           <Controls />

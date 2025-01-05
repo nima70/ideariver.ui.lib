@@ -40,13 +40,15 @@ export default function PluginFlow() {
       nds.map((node) => (node.id === id ? { ...node, ...data } : node))
     );
   };
-
+  const handleDeleteNode = () => {
+    setNodes((nds) => nds.filter((node) => !node.selected));
+    setEdges((eds) => eds.filter((edge) => !edge.selected));
+  };
   // Delete nodes/edges on Delete key
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if (event.key === "Delete" || event.key === "Backspace") {
-        setNodes((nds) => nds.filter((node) => !node.selected));
-        setEdges((eds) => eds.filter((edge) => !edge.selected));
+        handleDeleteNode();
       }
     },
     [setNodes, setEdges]
@@ -98,6 +100,9 @@ export default function PluginFlow() {
         />
         <Button disabled={!isNodeSelected} onClick={handleEditNode}>
           Edit Node
+        </Button>
+        <Button disabled={!isNodeSelected} onClick={handleDeleteNode}>
+          Delete Node
         </Button>
         <SaveButton nodes={nodes} edges={edges} />
       </div>

@@ -9,6 +9,7 @@ import ReactFlow, {
   Edge,
   Node,
 } from "reactflow";
+import AddEditIO from "./IOComponent";
 import "reactflow/dist/style.css";
 import CustomNode from "./CustomNode";
 import FlowToolbar from "./FlowToolbar";
@@ -23,6 +24,7 @@ export default function PluginFlow() {
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [isDrawerOpen, setDrawerOpen] = useState(false);
   const [isNodeSelected, setNodeSelected] = useState(false);
+  const [isIODrawerOpen, setIODrawerOpen] = useState(false); // IO Drawer State
   // Add node callback
   const addNode = (node: Node) => {
     setNodes((nds) =>
@@ -88,6 +90,25 @@ export default function PluginFlow() {
   const handleEditNode = () => {
     setDrawerOpen(true);
   };
+  // Open IO Drawer
+  const handleOpenIODrawer = () => {
+    setIODrawerOpen(true);
+  };
+  const handleSaveIO = (newNode: any) => {
+    const ioNode: Node = {
+      id: `${Math.random()}`,
+      type: "custom",
+      position: { x: Math.random() * 400, y: Math.random() * 400 },
+      data: {
+        label: newNode.name,
+        description: newNode.description,
+        inputs: newNode.type === "output" ? [] : ["dt"],
+        outputs: newNode.type === "input" ? [] : ["signal"],
+        parameters: {},
+      },
+    };
+    addNode(ioNode);
+  };
 
   return (
     <div className="relative w-full h-screen">
@@ -98,12 +119,14 @@ export default function PluginFlow() {
           onUpdateNode={updateNode}
           selectedNode={selectedNode}
         />
+        <Button onClick={handleOpenIODrawer}>Add Input/Output</Button>
         <Button disabled={!isNodeSelected} onClick={handleEditNode}>
           Edit Node
         </Button>
         <Button disabled={!isNodeSelected} onClick={handleDeleteNode}>
           Delete Node
         </Button>
+
         <SaveButton nodes={nodes} edges={edges} />
       </div>
 
@@ -134,6 +157,11 @@ export default function PluginFlow() {
         isOpen={isDrawerOpen}
         onSave={updateNode}
         onClose={() => setDrawerOpen(false)}
+      />
+      <AddEditIO
+        open={isIODrawerOpen}
+        onClose={() => setIODrawerOpen(false)}
+        onSave={handleSaveIO}
       />
     </div>
   );

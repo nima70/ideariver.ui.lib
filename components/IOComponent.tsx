@@ -1,3 +1,4 @@
+//./IOComponent
 import React, { useState, useEffect } from "react";
 import {
   Drawer,
@@ -15,62 +16,87 @@ import { IO } from "../../controlengines/core/PluginConfig";
 interface AddEditIOProps {
   open: boolean;
   onClose: () => void;
-  onSave: (config: IO) => void;
-  initialData?: IO;
+  onSave: (inputs: IO[], outputs: IO[]) => void;
+  initialInputs?: IO[];
+  initialOutputs?: IO[];
+}
+
+enum IOType {
+  INPUT,
+  OUTPUT,
 }
 
 export default function AddEditIO({
   open,
   onClose,
   onSave,
-  initialData,
+  initialInputs = [],
+  initialOutputs = [],
 }: AddEditIOProps) {
-  const [formData, setFormData] = useState<IO>(
-    initialData || { name: "", title: "", description: "", type: "input" }
-  );
-  const [ioList, setIoList] = useState<IO[]>([]);
-  const [isDialogOpen, setDialogOpen] = useState(false); // State for dialog
+  const [inputIOList, setInputIOList] = useState<IO[]>(initialInputs);
+  const [outputIOList, setOutputIOList] = useState<IO[]>(initialOutputs);
+  const [formData, setFormData] = useState<IO>({
+    name: "",
+    title: "",
+    description: "",
+    type: "input",
+  });
+  const [isDialogOpen, setDialogOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editType, setEditType] = useState<IOType>(IOType.INPUT); // Track whether adding/editing input or output
 
-  useEffect(() => {
-    if (initialData) {
-      setFormData(initialData);
-    } else {
-      setFormData({ name: "", title: "", description: "", type: "input" });
-    }
-  }, [initialData, open]);
+
 
   const handleSave = () => {
-    onSave(formData);
-    setIoList((prev) => [...prev, formData]);
+    onSave(inputIOList, outputIOList);
     onClose();
   };
 
-  const handleAddIO = () => {
-    setFormData({ name: "", title: "", description: "", type: formData.type });
+  const handleAddIO = (type: IOType) => {
+    setFormData({
+      name: "",
+      title: "",
+      description: "",
+      type: type === IOType.INPUT ? "input" : "output",
+    });
     setEditingIndex(null);
+    setEditType(type);
     setDialogOpen(true);
   };
 
-  const handleEditIO = (index: number) => {
-    setFormData(ioList[index]);
+  const handleEditIO = (index: number, type: IOType) => {
+    const selectedList = type === IOType.INPUT ? inputIOList : outputIOList;
+    setFormData(selectedList[index]);
     setEditingIndex(index);
+    setEditType(type);
     setDialogOpen(true);
   };
 
-  const handleDeleteIO = (index: number) => {
-    setIoList((prev) => prev.filter((_, i) => i !== index));
+  const handleDeleteIO = (index: number, type: IOType) => {
+    if (type === IOType.INPUT) {
+      setInputIOList((prev) => prev.filter((_, i) => i !== index));
+    } else {
+      setOutputIOList((prev) => prev.filter((_, i) => i !== index));
+    }
   };
 
   const handleDialogSave = (config: IO) => {
-    if (editingIndex !== null) {
-      // Update existing I/O
-      setIoList((prev) =>
-        prev.map((item, index) => (index === editingIndex ? config : item))
-      );
+    if (editType === IOType.INPUT) {
+      if (editingIndex !== null) {
+        setInputIOList((prev) =>
+          prev.map((item, index) => (index === editingIndex ? config : item))
+        );
+      } else {
+        setInputIOList((prev) => [...prev, config]);
+      }
     } else {
-      // Add new I/O
-      setIoList((prev) => [...prev, config]);
+      if (editingIndex !== null) {
+        setOutputIOList((prev) =>
+          prev.map((item, index) => (index === editingIndex ? config : item))
+        );
+      } else {
+        setOutputIOList((prev) => [...prev, config]);
+      }
     }
     setDialogOpen(false);
   };
@@ -80,25 +106,33 @@ export default function AddEditIO({
       <Drawer open={open} onClose={onClose}>
         <DrawerContent>
           <DrawerHeader>
-            <DrawerTitle>
-              {initialData
-                ? "Edit I/O Configuration"
-                : "Add New I/O Configuration"}
-            </DrawerTitle>
+            <DrawerTitle>Manage I/O Configurations</DrawerTitle>
           </DrawerHeader>
 
+          {/* Inputs Section */}
           <IOManager
-            ioList={ioList}
-            onEdit={handleEditIO}
-            onDelete={handleDeleteIO}
-            dataType={formData.type}
-            onAdd={handleAddIO} // Trigger dialog for adding I/O
+            ioList={inputIOList}
+            onEdit={(index) => handleEditIO(index, IOType.INPUT)}
+            onDelete={(index) => handleDeleteIO(index, IOType.INPUT)}
+            dataType="input"
+            onAdd={() => handleAddIO(IOType.INPUT)}
+          />
+
+          {/* Outputs Section */}
+          <IOManager
+            ioList={outputIOList}
+            onEdit={(index) => handleEditIO(index, IOType.OUTPUT)}
+            onDelete={(index) => handleDeleteIO(index, IOType.OUTPUT)}
+            dataType="output"
+            onAdd={() => handleAddIO(IOType.OUTPUT)}
           />
 
           <DrawerFooter>
-            <Button onClick={handleSave}>Save</Button>
+            <Button onClick={handleSave}>Save All</Button>
             <DrawerClose>
-              <Button variant="outline">Cancel</Button>
+              <Button onClick={onClose} variant="outline">
+                Cancel
+              </Button>
             </DrawerClose>
           </DrawerFooter>
         </DrawerContent>

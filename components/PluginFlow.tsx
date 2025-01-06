@@ -1,3 +1,4 @@
+//PluginFlox.tsx
 import React, { useCallback, useEffect, useState } from "react";
 import ReactFlow, {
   Background,
@@ -16,6 +17,7 @@ import FlowToolbar from "./FlowToolbar";
 import SaveButton from "./SaveButton";
 import NodeParameterDrawer from "./NodeParameterDrawer";
 import { Button } from "./ui/button";
+import { IO } from "@/controlengines/core/PluginConfig";
 const initialEdges: Edge[] = [];
 
 export default function PluginFlow() {
@@ -94,20 +96,39 @@ export default function PluginFlow() {
   const handleOpenIODrawer = () => {
     setIODrawerOpen(true);
   };
-  const handleSaveIO = (newNode: any) => {
-    const ioNode: Node = {
-      id: `${Math.random()}`,
-      type: "custom",
-      position: { x: Math.random() * 400, y: Math.random() * 400 },
-      data: {
-        label: newNode.name,
-        description: newNode.description,
-        inputs: newNode.type === "output" ? [] : ["dt"],
-        outputs: newNode.type === "input" ? [] : ["signal"],
-        parameters: {},
-      },
-    };
-    addNode(ioNode);
+  const handleSaveIO = (inputs: IO[], outputs: IO[]) => {
+    // // Create nodes for each input
+    // inputs.forEach((input) => {
+    //   const ioNode: Node = {
+    //     id: `${Math.random()}`,
+    //     type: "custom",
+    //     position: { x: Math.random() * 400, y: Math.random() * 400 },
+    //     data: {
+    //       label: input.name,
+    //       description: input.description,
+    //       inputs: [], // Input nodes shouldn't have inputs
+    //       outputs: ["signal"], // Output flows from input
+    //       parameters: {},
+    //     },
+    //   };
+    //   addNode(ioNode);
+    // });
+    // // Create nodes for each output
+    // outputs.forEach((output) => {
+    //   const ioNode: Node = {
+    //     id: `${Math.random()}`,
+    //     type: "custom",
+    //     position: { x: Math.random() * 400, y: Math.random() * 400 },
+    //     data: {
+    //       label: output.name,
+    //       description: output.description,
+    //       inputs: ["dt"], // Inputs flow into output nodes
+    //       outputs: [], // Output nodes shouldn't have outputs
+    //       parameters: {},
+    //     },
+    //   };
+    //   addNode(ioNode);
+    // });
   };
 
   return (

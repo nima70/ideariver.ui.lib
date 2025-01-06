@@ -18,13 +18,14 @@ import SaveButton from "./SaveButton";
 import NodeParameterDrawer from "./NodeParameterDrawer";
 import { Button } from "./ui/button";
 import { IO } from "@/controlengines/core/PluginConfig";
+import { INPUT_NODE_ID, OUTPUT_NODE_ID } from "../constants/nodeConstants";
 
 const initialEdges: Edge[] = [];
 
 // Default non-deletable input/output nodes
 const defaultNodes: Node[] = [
   {
-    id: "input-node",
+    id: INPUT_NODE_ID,
     type: "custom",
     position: { x: 100, y: 200 },
     data: {
@@ -36,7 +37,7 @@ const defaultNodes: Node[] = [
     },
   },
   {
-    id: "output-node",
+    id: OUTPUT_NODE_ID,
     type: "custom",
     position: { x: 800, y: 200 },
     data: {
@@ -85,7 +86,7 @@ export default function PluginFlow() {
   const handleDeleteNode = () => {
     setNodes((nds) =>
       nds.filter((node) => {
-        if (node.id === "input-node" || node.id === "output-node") {
+        if (node.id === INPUT_NODE_ID || node.id === OUTPUT_NODE_ID) {
           return true;
         }
         console.log("Deleting node.id:", node.id);
@@ -159,20 +160,20 @@ export default function PluginFlow() {
   const handleSaveIO = (inputs: IO[], outputs: IO[]) => {
     setNodes((nds) =>
       nds.map((node) => {
-        if (node.id === "input-node") {
+        if (node.id === INPUT_NODE_ID) {
           return {
             ...node,
             data: {
               ...node.data,
-              outputs: inputs.map((input) => input.name), // Assign inputs to output-node
+              outputs: inputs.map((input) => input.name), // Assign inputs to OUTPUT_NODE_ID
             },
           };
-        } else if (node.id === "output-node") {
+        } else if (node.id === OUTPUT_NODE_ID) {
           return {
             ...node,
             data: {
               ...node.data,
-              inputs: outputs.map((output) => output.name), // Assign outputs to input-node
+              inputs: outputs.map((output) => output.name), // Assign outputs to INPUT_NODE_ID
             },
           };
         }

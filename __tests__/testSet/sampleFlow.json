@@ -1,11 +1,57 @@
 {
   "nodes": [
     {
-      "id": "0.19407061602281406",
+      "id": "input-node",
       "type": "custom",
       "position": {
-        "x": -169.67751873696898,
-        "y": 103.35404727379563
+        "x": -236.56661768180868,
+        "y": 279.534474495413
+      },
+      "data": {
+        "label": "Input",
+        "description": "Default Input Node",
+        "deletable": false,
+        "inputs": [],
+        "outputs": []
+      },
+      "width": 220,
+      "height": 140,
+      "selected": false,
+      "positionAbsolute": {
+        "x": -236.56661768180868,
+        "y": 279.534474495413
+      },
+      "dragging": false
+    },
+    {
+      "id": "output-node",
+      "type": "custom",
+      "position": {
+        "x": 1209.3115638666377,
+        "y": 21.532398693219676
+      },
+      "data": {
+        "label": "Output",
+        "description": "Default Output Node",
+        "deletable": false,
+        "inputs": ["output"],
+        "outputs": []
+      },
+      "width": 220,
+      "height": 140,
+      "selected": false,
+      "positionAbsolute": {
+        "x": 1209.3115638666377,
+        "y": 21.532398693219676
+      },
+      "dragging": false
+    },
+    {
+      "id": "0.8601951601788602",
+      "type": "custom",
+      "position": {
+        "x": 294.1764930104584,
+        "y": 257.2626437456412
       },
       "data": {
         "label": "Constant Value Generator",
@@ -21,17 +67,17 @@
       "height": 140,
       "selected": false,
       "positionAbsolute": {
-        "x": -169.67751873696898,
-        "y": 103.35404727379563
+        "x": 294.1764930104584,
+        "y": 257.2626437456412
       },
       "dragging": false
     },
     {
-      "id": "0.9282406088660826",
+      "id": "0.09118179739525933",
       "type": "custom",
       "position": {
-        "x": 288.4386650682936,
-        "y": 39.248765779363055
+        "x": 681.9022580326026,
+        "y": 118.77230569310163
       },
       "data": {
         "label": "RL Circuit",
@@ -40,7 +86,7 @@
         "parameters": {
           "R": 10,
           "L": 5,
-          "initialCurrent": 0,
+          "initialCurrent": "",
           "dt": 0.01
         }
       },
@@ -50,19 +96,26 @@
       "height": 140,
       "selected": true,
       "positionAbsolute": {
-        "x": 288.4386650682936,
-        "y": 39.248765779363055
+        "x": 681.9022580326026,
+        "y": 118.77230569310163
       },
       "dragging": false
     }
   ],
   "edges": [
     {
-      "source": "0.19407061602281406",
+      "source": "0.8601951601788602",
       "sourceHandle": "output-0",
-      "target": "0.9282406088660826",
+      "target": "0.09118179739525933",
       "targetHandle": "input-0",
-      "id": "reactflow__edge-0.19407061602281406output-0-0.9282406088660826input-0"
+      "id": "reactflow__edge-0.8601951601788602output-0-0.09118179739525933input-0"
+    },
+    {
+      "source": "0.09118179739525933",
+      "sourceHandle": "output-0",
+      "target": "output-node",
+      "targetHandle": "input-0",
+      "id": "reactflow__edge-0.09118179739525933output-0-output-nodeinput-0"
     }
   ]
 }
